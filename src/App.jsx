@@ -104,7 +104,7 @@ function App() {
       const data = await response.json();
 
       if (data.Response === "True") {
-        // Fetch detailed information for each movie (limit to 6)
+        // Fetch detailed information for each movie s
         const detailedMovies = await Promise.all(
           data.Search.map(async (movie) => {
             const details = await fetchMovieDetails(movie.Title);
