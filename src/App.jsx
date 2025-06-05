@@ -21,12 +21,10 @@ function App() {
 
   // Popular movie titles to fetch for latest movies (exact OMDb titles)
   const popularMovieTitles = [
-    "Avatar",
-    "The Batman",
-    "Spider-Man: No Way Home",
-    "Black Panther",
-    "Doctor Strange",
+    "Avatar: The Way of Water",
+    "The Lord of the Rings: The Return of the King",
     "Avengers: Endgame",
+    "Spider-Man: No Way Home",
   ];
 
   // Save favorites to localStorage whenever favorites change
