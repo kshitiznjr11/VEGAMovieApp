@@ -290,7 +290,7 @@ function App() {
   return (
     <div className="app">
       {/* Navigation Bar with Integrated Search */}
-      <Navbar
+      <NavBar
         currentView={currentView}
         onViewChange={handleViewChange}
         searchQuery={searchQuery}
