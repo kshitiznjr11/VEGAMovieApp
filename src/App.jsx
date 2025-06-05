@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Navbar from "./components/Navbar";
+import NavBar from "./components/NavBar";
 import MovieCard from "./components/MovieCard";
 import { FaFilm } from "react-icons/fa";
 import "./App.css";
