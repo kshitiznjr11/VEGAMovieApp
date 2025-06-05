@@ -29,6 +29,16 @@ function App() {
     "Avengers: Endgame",
   ];
 
+  // Save favorites to localStorage whenever favorites change
+  useEffect(() => {
+    try {
+      console.log("Saving favorites to localStorage:", favorites); // Debug log
+      localStorage.setItem("movieFavorites", JSON.stringify(avorites));
+    } catch (error) {
+      console.error("Error saving favorites to localStorage:", error);
+    }
+  }, [favorites]);
+
   // Load favorites from localStorage on component mount
   useEffect(() => {
     try {
@@ -47,16 +57,6 @@ function App() {
       localStorage.removeItem("movieFavorites");
     }
   }, []);
-
-  // Save favorites to localStorage whenever favorites change
-  useEffect(() => {
-    try {
-      console.log("Saving favorites to localStorage:", favorites); // Debug log
-      localStorage.setItem("movieFavorites", JSON.stringify(favorites));
-    } catch (error) {
-      console.error("Error saving favorites to localStorage:", error);
-    }
-  }, [favorites]);
 
   // Fetch movie details from OMDb API
   const fetchMovieDetails = async (title) => {
