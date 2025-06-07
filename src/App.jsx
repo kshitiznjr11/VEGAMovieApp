@@ -31,7 +31,7 @@ function App() {
   useEffect(() => {
     try {
       console.log("Saving favorites to localStorage:", favorites); // Debug log
-      localStorage.setItem("movieFavorites", JSON.stringify(avorites));
+      localStorage.setItem("movieFavorites", JSON.stringify(favorites));
     } catch (error) {
       console.error("Error saving favorites to localStorage:", error);
     }

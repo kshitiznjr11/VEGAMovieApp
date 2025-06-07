@@ -1,13 +1,4 @@
-"use client";
-
-import {
-  FaHeart,
-  FaRegHeart,
-  FaCalendarAlt,
-  FaFilm,
-  FaStar,
-  FaClock,
-} from "react-icons/fa";
+import { FaHeart, FaRegHeart, FaCalendarAlt, FaClock } from "react-icons/fa";
 
 // MovieCard Component - Displays individual movie information
 const MovieCard = ({
@@ -47,12 +38,6 @@ const MovieCard = ({
     return runtime;
   };
 
-  // Format rating
-  const formatRating = (rating) => {
-    if (!rating || rating === "N/A") return null;
-    return rating;
-  };
-
   return (
     <div className="movie-card">
       <div className="movie-poster">
@@ -82,14 +67,6 @@ const MovieCard = ({
             )}
           </button>
         </div>
-
-        {/* Rating Badge */}
-        {formatRating(movie.imdbRating) && (
-          <div className="rating-badge">
-            <FaStar className="star-icon" />
-            <span>{movie.imdbRating}</span>
-          </div>
-        )}
       </div>
 
       <div className="movie-info">
@@ -109,21 +86,6 @@ const MovieCard = ({
             </span>
           )}
         </div>
-
-        {/* Genre */}
-        {movie.Genre && movie.Genre !== "N/A" && (
-          <div className="movie-genre">
-            <span className="genre-label">
-              <FaFilm className="info-icon" />
-              {movie.Genre.split(",")[0].trim()}
-            </span>
-          </div>
-        )}
-
-        {/* Plot */}
-        {movie.Plot && movie.Plot !== "N/A" && (
-          <p className="movie-plot">{movie.Plot}</p>
-        )}
       </div>
     </div>
   );

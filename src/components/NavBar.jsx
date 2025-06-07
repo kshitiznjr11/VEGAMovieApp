@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { FaHome, FaHeart, FaFilm, FaSearch, FaTimes } from "react-icons/fa";
 
