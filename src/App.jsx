@@ -11,7 +11,15 @@ function App() {
   const [currentView, setCurrentView] = useState("home");
   const [latestMovies, setLatestMovies] = useState([]);
   const [searchResults, setSearchResults] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      const savedFavorites = localStorage.getItem("movieFavorites");
+      return savedFavorites ? JSON.parse(savedFavorites) : [];
+    } catch (error) {
+      console.error("Error loading favorites from localStorage:", error);
+      return [];
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [searchLoading, setSearchLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -30,31 +38,11 @@ function App() {
   // Save favorites to localStorage whenever favorites change
   useEffect(() => {
     try {
-      console.log("Saving favorites to localStorage:", favorites); // Debug log
       localStorage.setItem("movieFavorites", JSON.stringify(favorites));
     } catch (error) {
       console.error("Error saving favorites to localStorage:", error);
     }
   }, [favorites]);
-
-  // Load favorites from localStorage on component mount
-  useEffect(() => {
-    try {
-      const savedFavorites = localStorage.getItem("movieFavorites");
-      console.log("Loading favorites from localStorage:", savedFavorites); // Debug log
-      if (savedFavorites) {
-        const parsedFavorites = JSON.parse(savedFavorites);
-        if (Array.isArray(parsedFavorites)) {
-          setFavorites(parsedFavorites);
-          console.log("Loaded favorites:", parsedFavorites); // Debug log
-        }
-      }
-    } catch (error) {
-      console.error("Error loading favorites from localStorage:", error);
-      // Clear corrupted data
-      localStorage.removeItem("movieFavorites");
-    }
-  }, []);
 
   // Fetch movie details from OMDb API
   const fetchMovieDetails = async (title) => {
@@ -183,16 +171,7 @@ function App() {
         (fav) => fav.imdbID === movie.imdbID
       );
       if (!isAlreadyFavorite) {
-        const newFavorites = [...prevFavorites, movie];
-        console.log("Adding to favorites:", movie.Title); // Debug log
-        // Immediate save to localStorage
-        try {
-          localStorage.setItem("movieFavorites", JSON.stringify(newFavorites));
-          console.log("Favorites saved to localStorage"); // Debug log
-        } catch (error) {
-          console.error("Error saving to localStorage:", error);
-        }
-        return newFavorites;
+        return [...prevFavorites, movie];
       }
       return prevFavorites;
     });
@@ -200,33 +179,8 @@ function App() {
 
   // Handle remove from favorites
   const handleRemoveFromFavorites = (movieId) => {
-    console.log("Attempting to remove movie with ID:", movieId); // Debug log
-
     setFavorites((prevFavorites) => {
-      const movieToRemove = prevFavorites.find(
-        (movie) => movie.imdbID === movieId
-      );
-      console.log("Movie to remove:", movieToRemove); // Debug log
-
-      if (!movieToRemove) {
-        console.log("Movie not found in favorites"); // Debug log
-        return prevFavorites;
-      }
-
-      const newFavorites = prevFavorites.filter(
-        (movie) => movie.imdbID !== movieId
-      );
-      console.log("New favorites after removal:", newFavorites); // Debug log
-
-      // Immediate save to localStorage
-      try {
-        localStorage.setItem("movieFavorites", JSON.stringify(newFavorites));
-        console.log("Favorites updated in localStorage after removal"); // Debug log
-      } catch (error) {
-        console.error("Error saving to localStorage:", error);
-      }
-
-      return newFavorites;
+      return prevFavorites.filter((movie) => movie.imdbID !== movieId);
     });
   };
 
@@ -285,6 +239,46 @@ function App() {
     }
   };
 
+  // Render movie grid
+  const renderMovieGrid = (movies, title, description) => {
+    if (getCurrentLoading()) {
+      return (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading movies...</p>
+        </div>
+      );
+    }
+
+    if (movies.length === 0) {
+      return (
+        <div className="empty-state">
+          <FaFilm className="empty-icon" />
+          <h3>No movies found</h3>
+          <p>Try searching with different keywords</p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="movies-section">
+        <h2>{title}</h2>
+        <p>{description}</p>
+        <div className="movies-grid">
+          {movies.map((movie) => (
+            <MovieCard
+              key={movie.imdbID}
+              movie={movie}
+              onAddToFavorites={handleAddToFavorites}
+              onRemoveFromFavorites={handleRemoveFromFavorites}
+              isFavorite={isFavorite}
+            />
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="app">
       {/* Navigation Bar with Integrated Search */}
@@ -297,62 +291,44 @@ function App() {
       />
 
       <main className="app-main">
-        {/* Content Display based on current view */}
-        <div className="movies-section">
-          <h2>{getSectionTitle()}</h2>
-          <p>{getSectionDescription()}</p>
-
-          {error && (
-            <div className="error-container">
-              <p className="error-message">{error}</p>
-              {currentView === "home" && (
-                <button
-                  onClick={() => window.location.reload()}
-                  className="retry-btn"
-                >
-                  Retry
-                </button>
-              )}
-            </div>
-          )}
-
-          {getCurrentLoading() ? (
-            <div className="loading-container">
-              <div className="spinner"></div>
-              <p>Loading movies...</p>
-            </div>
-          ) : getCurrentMovies().length > 0 ? (
-            <div className="movies-grid">
-              {getCurrentMovies().map((movie) => (
-                <MovieCard
-                  key={movie.imdbID}
-                  movie={movie}
-                  onAddToFavorites={handleAddToFavorites}
-                  onRemoveFromFavorites={handleRemoveFromFavorites}
-                  isFavorite={isFavorite}
-                />
-              ))}
-            </div>
-          ) : currentView === "favorites" ? (
-            <div className="empty-state">
-              <FaFilm className="empty-icon" />
-              <h3>No favorites yet</h3>
-              <p>Start exploring movies to build your personal collection</p>
+        {error && (
+          <div className="error-container">
+            <p className="error-message">{error}</p>
+            {currentView === "home" && (
               <button
-                onClick={() => handleViewChange("home")}
-                className="go-home-btn"
+                onClick={() => window.location.reload()}
+                className="retry-btn"
               >
-                Start Exploring
+                Retry
               </button>
-            </div>
-          ) : currentView === "search" && !getCurrentLoading() && !error ? (
-            <div className="empty-state">
-              <FaFilm className="empty-icon" />
-              <h3>No movies found</h3>
-              <p>Try searching with different keywords</p>
-            </div>
-          ) : null}
-        </div>
+            )}
+          </div>
+        )}
+
+        {currentView === "home" ? (
+          <>
+            {renderMovieGrid(
+              latestMovies,
+              "Popular Movies",
+              "Discover popular and trending films"
+            )}
+            {favorites.length > 0 && (
+              <div className="favorites-section">
+                {renderMovieGrid(
+                  favorites,
+                  "Your Favorites",
+                  `You have ${favorites.length} favorite movies`
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          renderMovieGrid(
+            getCurrentMovies(),
+            getSectionTitle(),
+            getSectionDescription()
+          )
+        )}
       </main>
     </div>
   );
